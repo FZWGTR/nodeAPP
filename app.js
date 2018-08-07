@@ -6,6 +6,9 @@ const http=require('http');
 // path：生成绝对路径
 const path=require('path');
 
+// 引入第三方模块
+const mime=require('mime');
+
 // 记录网站根目录
 let rootPath=path.join(__dirname,'www');
 console.log(rootPath);
@@ -20,10 +23,24 @@ let server=http.createServer((request,response)=>{
 
     // 2.判断文件是否存在
     if(fs.existsSync(targetPath)){
+        // 3.文件 还是文件夹
+        // response.setHeader('content-type','text/html;charset=utf-8');
+        fs.stat(targetPath,(err,stats)=>{
+            // 是文件 直接读取 并返回
+            if(stats.isFile()){
 
-        let stats=fs.stat(targetPath);
-        response.setHeader('content-type','text/html;charset=utf-8');
-        response.end('存在哦')
+                // 4.使用mime设置类型
+                response.setHeader('content-type',mime.getType(targetPath));
+
+                fs.readFile(targetPath,(err,data)=>{
+                    response.end(data);
+                })
+            }
+            // 是文件夹 渲染出列表
+        })
+        // let stats=fs.stat(targetPath);
+    
+        // response.end('存在哦')
     }
     // 不存在
     else{
